@@ -1,0 +1,1915 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPL Player Rankings · Cricket Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* ============================================================
+       DESIGN TOKENS & CSS VARIABLES
+    ============================================================ */
+    :root {
+      --bg: #F7F8F5;
+      --surface: #FFFFFF;
+      --surface-raised: #FAFAF8;
+      --brand: #176B45;
+      --brand-dark: #104B35;
+      --brand-muted: #E8F3ED;
+      --lime: #C7E66B;
+      --lime-dark: #A8C94E;
+      --text-primary: #17251F;
+      --text-secondary: #68756E;
+      --text-muted: #9BA8A2;
+      --border: #E5EAE5;
+      --border-strong: #CDD5CD;
+      --positive: #23865B;
+      --warning: #D99A32;
+      --negative: #D65353;
+      --neutral: #64748B;
+      --shadow-sm: 0 1px 3px rgba(23,37,31,.06), 0 1px 2px rgba(23,37,31,.04);
+      --shadow-md: 0 4px 16px rgba(23,37,31,.08), 0 2px 6px rgba(23,37,31,.05);
+      --shadow-lg: 0 12px 40px rgba(23,37,31,.12), 0 4px 12px rgba(23,37,31,.06);
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --transition: 0.18s ease;
+      --font-display: 'Manrope', system-ui, sans-serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+    }
+    [data-theme="dark"] {
+      --bg: #101914;
+      --surface: #18241D;
+      --surface-raised: #202D25;
+      --brand: #66B98A;
+      --brand-dark: #4A9E70;
+      --brand-muted: #1A2E21;
+      --lime: #C7E66B;
+      --lime-dark: #A8C94E;
+      --text-primary: #F1F5F1;
+      --text-secondary: #A5B2A8;
+      --text-muted: #6A7A70;
+      --border: #304137;
+      --border-strong: #445A49;
+      --positive: #66C98A;
+      --warning: #E5AD4A;
+      --negative: #E06565;
+      --neutral: #94A3B8;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.2);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.25);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,.35);
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.6;
+      background: var(--bg);
+      color: var(--text-primary);
+      transition: background var(--transition), color var(--transition);
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: var(--lime); color: var(--brand-dark); }
+
+    /* ============================================================
+       TYPOGRAPHY TOKENS
+    ============================================================ */
+    .t-display { font-family: var(--font-display); font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+    .t-h1 { font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+    .t-h2 { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; }
+    .t-h3 { font-family: var(--font-display); font-size: 1rem; font-weight: 600; }
+    .t-body { font-size: 0.9375rem; line-height: 1.65; }
+    .t-small { font-size: 0.8125rem; color: var(--text-secondary); }
+    .t-mono { font-family: 'Inter', monospace; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+    .t-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); }
+
+    /* ============================================================
+       LAYOUT
+    ============================================================ */
+    .container { max-width: 1340px; margin: 0 auto; padding: 0 24px; }
+    .container-narrow { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+    section { padding: 64px 0; }
+    .section-tight { padding: 40px 0; }
+
+    /* ============================================================
+       NAVIGATION
+    ============================================================ */
+    .nav-bar {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .nav-inner {
+      display: flex; align-items: center; gap: 0;
+      height: 64px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; margin-right: 48px;
+      flex-shrink: 0;
+    }
+    .nav-logo-icon {
+      width: 32px; height: 32px;
+      background: var(--brand);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .nav-logo-text {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.0625rem;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+    .nav-logo-text span { color: var(--brand); }
+    .nav-links { display: flex; gap: 2px; flex: 1; }
+    .nav-link {
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem; font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color var(--transition), background var(--transition);
+      cursor: pointer;
+    }
+    .nav-link:hover { color: var(--text-primary); background: var(--bg); }
+    .nav-link.active { color: var(--brand); background: var(--brand-muted); font-weight: 600; }
+    .nav-actions { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+    .btn-icon {
+      width: 36px; height: 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-secondary);
+      transition: all var(--transition); font-size: 1rem;
+    }
+    .btn-icon:hover { background: var(--bg); color: var(--text-primary); border-color: var(--border-strong); }
+    .nav-pill {
+      background: var(--brand);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 0.8125rem; font-weight: 600;
+      border: none; cursor: pointer;
+      transition: background var(--transition);
+    }
+    .nav-pill:hover { background: var(--brand-dark); }
+
+    /* ============================================================
+       HERO
+    ============================================================ */
+    .hero {
+      padding: 80px 0 64px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -60px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(199,230,107,0.12) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .hero-inner { display: grid; grid-template-columns: 1fr 380px; gap: 48px; align-items: center; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--brand-muted);
+      color: var(--brand);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.05em; text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero-eyebrow::before { content: '●'; font-size: 0.5rem; }
+    .hero-title { color: var(--text-primary); margin-bottom: 16px; }
+    .hero-title em {
+      font-style: normal;
+      color: var(--brand);
+      display: block;
+    }
+    .hero-desc {
+      font-size: 1.0625rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin-bottom: 32px;
+      line-height: 1.7;
+    }
+    .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--brand);
+      color: white;
+      padding: 11px 24px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9375rem; font-weight: 600;
+      border: none; cursor: pointer;
+      transition: all var(--transition);
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary:hover { background: var(--brand-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      padding: 11px 24px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9375rem; font-weight: 600;
+      border: 1.5px solid var(--border-strong);
+      cursor: pointer; transition: all var(--transition);
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-secondary:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-muted); }
+    .hero-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+    }
+    .hero-card-title {
+      font-family: var(--font-display);
+      font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    .hero-leader-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-leader-row:last-child { border-bottom: none; }
+    .hero-rank {
+      width: 20px; text-align: right;
+      font-size: 0.75rem; font-weight: 700;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .hero-rank.top { color: var(--brand); }
+    .mini-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6875rem; font-weight: 700; color: white;
+      flex-shrink: 0;
+    }
+    .hero-name { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); flex: 1; }
+    .hero-score {
+      font-size: 1rem; font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: var(--brand);
+    }
+
+    /* ============================================================
+       KPI SECTION
+    ============================================================ */
+    .kpi-section { background: var(--brand-dark); color: white; padding: 48px 0; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: rgba(255,255,255,0.1); border-radius: var(--radius-md); overflow: hidden; }
+    .kpi-card {
+      background: var(--brand-dark);
+      padding: 28px 24px;
+      display: flex; flex-direction: column; gap: 8px;
+      transition: background var(--transition);
+    }
+    .kpi-card:hover { background: var(--brand); }
+    .kpi-icon { font-size: 1.5rem; margin-bottom: 4px; }
+    .kpi-number {
+      font-family: var(--font-display);
+      font-size: 2rem; font-weight: 800;
+      color: var(--lime);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.03em;
+    }
+    .kpi-label { font-size: 0.875rem; font-weight: 600; color: rgba(255,255,255,0.9); }
+    .kpi-desc { font-size: 0.75rem; color: rgba(255,255,255,0.55); line-height: 1.4; margin-top: 2px; }
+
+    /* ============================================================
+       SECTION HEADER
+    ============================================================ */
+    .section-header { margin-bottom: 32px; }
+    .section-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--brand);
+      margin-bottom: 10px;
+    }
+    .section-eyebrow::before { content: ''; width: 16px; height: 2px; background: var(--lime); border-radius: 2px; }
+    .section-title { color: var(--text-primary); margin-bottom: 8px; }
+    .section-desc { font-size: 0.9375rem; color: var(--text-secondary); max-width: 580px; }
+
+    /* ============================================================
+       TABS
+    ============================================================ */
+    .tabs-bar {
+      display: flex; gap: 2px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      width: fit-content;
+      margin-bottom: 28px;
+    }
+    .tab-btn {
+      padding: 7px 20px;
+      border-radius: 4px;
+      font-size: 0.875rem; font-weight: 600;
+      border: none; cursor: pointer;
+      background: transparent;
+      color: var(--text-secondary);
+      transition: all var(--transition);
+    }
+    .tab-btn.active { background: var(--surface); color: var(--brand); box-shadow: var(--shadow-sm); }
+    .tab-btn:hover:not(.active) { color: var(--text-primary); }
+
+    /* ============================================================
+       FILTER BAR
+    ============================================================ */
+    .filter-bar {
+      display: flex; align-items: center; gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .search-input {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      flex: 0 0 220px;
+    }
+    .search-input input {
+      border: none; background: transparent;
+      font-size: 0.875rem; color: var(--text-primary);
+      width: 100%; outline: none;
+    }
+    .search-input input::placeholder { color: var(--text-muted); }
+    .search-icon { color: var(--text-muted); font-size: 1rem; }
+    .select-filter {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      font-size: 0.875rem; color: var(--text-secondary);
+      cursor: pointer; outline: none;
+      transition: border-color var(--transition);
+    }
+    .select-filter:focus { border-color: var(--brand); }
+    .filter-reset {
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8125rem; font-weight: 600;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .filter-reset:hover { border-color: var(--border-strong); color: var(--text-primary); }
+
+    /* ============================================================
+       RANKING TABLE
+    ============================================================ */
+    .table-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .ranking-table { width: 100%; border-collapse: collapse; }
+    .ranking-table thead { background: var(--surface-raised); border-bottom: 1px solid var(--border); }
+    .ranking-table th {
+      padding: 11px 16px;
+      text-align: left;
+      font-size: 0.6875rem; font-weight: 700;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+    .ranking-table th.r { text-align: right; }
+    .ranking-table th.sortable { cursor: pointer; }
+    .ranking-table th.sortable:hover { color: var(--text-primary); }
+    .ranking-row {
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .ranking-row:last-child { border-bottom: none; }
+    .ranking-row:hover { background: var(--brand-muted); }
+    .ranking-table td { padding: 13px 16px; vertical-align: middle; }
+    .rank-cell { width: 50px; }
+    .rank-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      font-size: 0.8125rem; font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      background: var(--bg);
+      color: var(--text-secondary);
+      border: 1.5px solid var(--border);
+    }
+    .rank-num.rank-1 { background: var(--brand); color: white; border-color: var(--brand); }
+    .rank-num.rank-2 { background: #2D7A58; color: white; border-color: #2D7A58; }
+    .rank-num.rank-3 { background: var(--brand-muted); color: var(--brand); border-color: var(--brand); }
+    .player-cell { min-width: 220px; }
+    .player-info { display: flex; align-items: center; gap: 12px; }
+    .player-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 800; color: white;
+      flex-shrink: 0;
+    }
+    .player-meta { display: flex; flex-direction: column; gap: 2px; }
+    .player-name { font-size: 0.9375rem; font-weight: 700; color: var(--text-primary); }
+    .player-sub { font-size: 0.75rem; color: var(--text-muted); }
+    .rating-cell { width: 90px; }
+    .rating-pill {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.875rem; font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      min-width: 54px;
+    }
+    .badge-elite { background: #E8F3ED; color: var(--brand); }
+    .badge-high { background: #EDF5E0; color: #4A7C20; }
+    .badge-mid { background: #FEF9EA; color: #9A6E10; }
+    .badge-low { background: var(--bg); color: var(--text-secondary); }
+    .metric-cell { width: 110px; }
+    .mini-bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .mini-val {
+      font-size: 0.8125rem; font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-primary);
+      min-width: 28px;
+    }
+    .mini-bar {
+      flex: 1; height: 5px;
+      background: var(--border);
+      border-radius: 999px; overflow: hidden;
+    }
+    .mini-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease; }
+    .fill-green { background: var(--brand); }
+    .fill-lime { background: var(--lime-dark); }
+    .fill-teal { background: #3BA882; }
+    .fill-sage { background: #7FAE90; }
+    .stat-cell {
+      text-align: right;
+      font-size: 0.875rem; font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-secondary);
+    }
+    .stat-cell.pos { color: var(--positive); }
+    .stat-cell.neg { color: var(--negative); }
+    .conf-cell { text-align: right; }
+    .conf-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .no-results { padding: 48px; text-align: center; color: var(--text-muted); }
+
+    /* ============================================================
+       DIMENSION LEGEND
+    ============================================================ */
+    .dim-legend {
+      display: flex; gap: 20px; flex-wrap: wrap;
+      padding: 16px 20px;
+      background: var(--surface-raised);
+      border-top: 1px solid var(--border);
+    }
+    .dim-item { display: flex; align-items: center; gap: 7px; }
+    .dim-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .dim-name { font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; }
+    .dim-weight {
+      font-size: 0.6875rem; font-weight: 700;
+      background: var(--bg); border: 1px solid var(--border);
+      padding: 1px 6px; border-radius: 4px;
+      color: var(--text-secondary);
+    }
+
+    /* ============================================================
+       PRESSURE ANALYSIS PAGE
+    ============================================================ */
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .chart-card-title { font-size: 0.9375rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .chart-card-desc { font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 20px; }
+    .chart-wrapper { position: relative; height: 260px; }
+
+    /* ============================================================
+       METHODOLOGY PAGE
+    ============================================================ */
+    .method-grid { display: grid; grid-template-columns: 280px 1fr; gap: 40px; align-items: start; }
+    .method-nav { position: sticky; top: 88px; }
+    .method-nav-link {
+      display: block; padding: 10px 16px;
+      font-size: 0.875rem; font-weight: 500;
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      text-decoration: none; cursor: pointer;
+      transition: all var(--transition);
+      border-left: 2px solid transparent;
+      margin-bottom: 2px;
+    }
+    .method-nav-link:hover { color: var(--text-primary); background: var(--bg); }
+    .method-nav-link.active { color: var(--brand); border-color: var(--brand); background: var(--brand-muted); font-weight: 600; }
+    .method-section {
+      margin-bottom: 48px;
+      padding-top: 8px;
+    }
+    .method-section h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .method-badge {
+      font-size: 0.6875rem; font-weight: 700;
+      padding: 3px 8px; border-radius: 4px;
+      background: var(--brand-muted); color: var(--brand);
+    }
+    .method-section p {
+      font-size: 0.9375rem; color: var(--text-secondary);
+      line-height: 1.7; margin-bottom: 12px;
+    }
+    .method-table { width: 100%; border-collapse: collapse; margin: 16px 0; border-radius: var(--radius-sm); overflow: hidden; }
+    .method-table th {
+      background: var(--bg);
+      padding: 10px 16px;
+      font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      text-align: left; color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    .method-table td {
+      padding: 10px 16px;
+      font-size: 0.875rem; color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    .method-table td:last-child { text-align: right; font-weight: 700; color: var(--brand); }
+    .formula-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--brand);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin: 16px 0;
+      font-family: 'Inter', monospace;
+      line-height: 1.8;
+    }
+    .formula-box strong { color: var(--text-primary); }
+    .pressure-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 999px;
+      font-size: 0.75rem; font-weight: 700;
+      margin: 3px;
+    }
+    .pill-low { background: #EEF2FF; color: #4F46E5; }
+    .pill-moderate { background: #FEF9EA; color: #9A6E10; }
+    .pill-high { background: #FFF1F0; color: #C0392B; }
+    .pill-extreme { background: #2D1414; color: #E06565; }
+    [data-theme="light"] .pill-extreme { background: #FEEEEE; color: #C0392B; }
+    .calibration-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 16px 0; }
+    .calib-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+    .calib-metric { font-size: 1.25rem; font-weight: 800; color: var(--brand); font-variant-numeric: tabular-nums; }
+    .calib-label { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; }
+
+    /* ============================================================
+       IPL HISTORY
+    ============================================================ */
+    .history-hero {
+      padding: 44px 40px;
+      border-radius: var(--radius-lg);
+      background: var(--brand-dark);
+      color: #fff;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .history-hero h1 { color: #fff; margin: 8px 0 10px; }
+    .history-hero p { color: rgba(255,255,255,.76); max-width: 720px; }
+    .history-kicker { color: var(--lime); font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .history-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .history-card, .history-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .history-card { min-height: 118px; }
+    .history-card-label { color: var(--text-secondary); font-size: .75rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+    .history-card-value { font-family: var(--font-display); color: var(--brand); font-size: 1.55rem; font-weight: 800; margin-top: 8px; line-height: 1.2; }
+    .history-card-note { color: var(--text-muted); font-size: .75rem; margin-top: 4px; }
+    .history-section { padding: 28px 0; }
+    .history-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+    .history-section-heading h2 { font-family: var(--font-display); font-size: 1.25rem; }
+    .history-panel { margin-bottom: 18px; }
+    .history-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 14px 0; }
+    .history-select, .history-search {
+      min-height: 40px; padding: 8px 12px; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); background: var(--surface); color: var(--text-primary);
+      font: inherit; font-size: .875rem;
+    }
+    .history-search { min-width: 220px; flex: 1 1 240px; }
+    .history-table-scroll { width: 100%; overflow-x: auto; }
+    .history-table { width: 100%; border-collapse: collapse; min-width: 720px; }
+    .history-table th { padding: 10px 12px; text-align: left; background: var(--surface-raised); color: var(--text-secondary); font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+    .history-table td { padding: 11px 12px; border-bottom: 1px solid var(--border); font-size: .86rem; vertical-align: middle; }
+    .history-table tr:last-child td { border-bottom: 0; }
+    .history-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .history-player-link { color: var(--brand); background: none; border: 0; padding: 0; font: inherit; font-weight: 700; cursor: pointer; text-align: left; }
+    .history-player-link:hover { text-decoration: underline; }
+    .history-team-chip { display: inline-block; border: 1px solid var(--border); border-radius: 999px; padding: 3px 9px; color: var(--text-secondary); font-size: .74rem; margin: 2px 3px 2px 0; }
+    .history-note { padding: 12px 14px; border-radius: var(--radius-sm); background: var(--brand-muted); color: var(--text-secondary); font-size: .82rem; line-height: 1.55; }
+    .history-note strong { color: var(--text-primary); }
+    .history-note.warning { background: color-mix(in srgb, var(--warning) 12%, var(--surface)); border-left: 3px solid var(--warning); }
+    .history-season-card { border-left: 3px solid var(--brand); }
+    .history-season-card h3 { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 10px; }
+    .history-season-result { color: var(--text-secondary); line-height: 1.7; font-size: .9rem; }
+    .cap-accent-orange { color: #B75A12; }
+    .cap-accent-purple { color: #7653A6; }
+    .cap-winner-unavailable { min-height: 160px; display: flex; flex-direction: column; justify-content: center; border-top: 3px solid var(--border-strong); }
+    .history-error { padding: 20px; border: 1px solid var(--negative); border-radius: var(--radius-md); background: color-mix(in srgb, var(--negative) 8%, var(--surface)); color: var(--text-primary); }
+    .history-profile-panel { max-width: 980px; }
+    .history-profile-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 20px; }
+    .history-profile-header h2 { font-family: var(--font-display); font-size: 1.6rem; }
+    .history-profile-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 18px 0; }
+    .history-profile-stats .history-card { min-height: 90px; padding: 14px; }
+    .history-profile-stats .history-card-value { font-size: 1.25rem; }
+    .history-empty { padding: 20px; color: var(--text-secondary); text-align: center; }
+
+    /* ============================================================
+       PLAYER MODAL
+    ============================================================ */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      display: none; align-items: flex-start; justify-content: center;
+      padding: 48px 24px;
+      overflow-y: auto;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-panel {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      width: 100%; max-width: 860px;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.22s ease;
+      overflow: hidden;
+      position: relative;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .modal-header {
+      background: var(--brand-dark);
+      padding: 28px 32px;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      position: relative;
+    }
+    .modal-header::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--lime) 0%, transparent 100%);
+    }
+    .modal-player-info { display: flex; align-items: center; gap: 20px; }
+    .modal-avatar {
+      width: 60px; height: 60px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; font-weight: 800; color: white;
+      border: 3px solid rgba(255,255,255,0.2);
+      flex-shrink: 0;
+    }
+    .modal-name {
+      font-family: var(--font-display);
+      font-size: 1.5rem; font-weight: 800;
+      color: white; letter-spacing: -0.02em;
+    }
+    .modal-sub { font-size: 0.875rem; color: rgba(255,255,255,0.65); margin-top: 4px; }
+    .modal-rating {
+      text-align: right;
+    }
+    .modal-rating-num {
+      font-family: var(--font-display);
+      font-size: 2.5rem; font-weight: 800;
+      color: var(--lime);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+    .modal-rating-label { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 4px; }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px;
+      width: 32px; height: 32px;
+      border-radius: 50%; background: rgba(255,255,255,0.1);
+      border: none; cursor: pointer; color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; transition: background var(--transition);
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.25); }
+    .modal-body { padding: 28px 32px; }
+    .modal-dims {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+      margin-bottom: 28px;
+    }
+    .dim-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+    }
+    .dim-score {
+      font-family: var(--font-display);
+      font-size: 1.75rem; font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.03em;
+      color: var(--brand);
+      display: block;
+    }
+    .dim-label-sm {
+      font-size: 0.6875rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-top: 4px; display: block;
+    }
+    .dim-weight-sm {
+      font-size: 0.625rem; color: var(--text-muted);
+      margin-top: 2px; display: block;
+    }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+    .modal-stat-group {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+    }
+    .modal-stat-group-title {
+      font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+    }
+    .stat-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 7px 0; border-bottom: 1px solid var(--border);
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-name { font-size: 0.8125rem; color: var(--text-secondary); }
+    .stat-val { font-size: 0.875rem; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+    .stat-val.pos { color: var(--positive); }
+    .stat-val.neg { color: var(--negative); }
+    .modal-chart-row { height: 220px; position: relative; }
+    .modal-scenario-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+    .scenario-badge {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+    }
+    .scenario-num {
+      font-family: var(--font-display);
+      font-size: 1.5rem; font-weight: 800;
+      color: var(--brand);
+      font-variant-numeric: tabular-nums;
+      display: block; margin-bottom: 4px;
+    }
+    .scenario-label { font-size: 0.75rem; color: var(--text-secondary); font-weight: 500; }
+    .bootstrap-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 18px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+    .bootstrap-bar-track {
+      flex: 1; height: 8px;
+      background: var(--border);
+      border-radius: 999px; overflow: hidden;
+    }
+    .bootstrap-bar-fill {
+      height: 100%;
+      background: var(--brand);
+      border-radius: 999px;
+      transition: width 0.8s ease;
+    }
+    .bootstrap-num {
+      font-size: 0.875rem; font-weight: 800;
+      color: var(--brand);
+      font-variant-numeric: tabular-nums;
+      min-width: 48px; text-align: right;
+    }
+
+    /* ============================================================
+       PAGE VISIBILITY
+    ============================================================ */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    .footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      margin-top: 80px;
+    }
+    .footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 1rem; font-weight: 800;
+      color: var(--text-primary);
+    }
+    .footer-logo span { color: var(--brand); }
+    .footer-text { font-size: 0.8125rem; color: var(--text-muted); }
+    .footer-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--brand-muted);
+      color: var(--brand);
+      padding: 5px 12px; border-radius: 999px;
+      font-size: 0.75rem; font-weight: 700;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 1100px) {
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-card { display: none; }
+      .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+      .method-grid { grid-template-columns: 1fr; }
+      .method-nav { display: none; }
+    }
+    @media (max-width: 860px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr 1fr; }
+      .modal-dims { grid-template-columns: repeat(3, 1fr); }
+      .modal-grid { grid-template-columns: 1fr; }
+      .modal-scenario-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 680px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .nav-inner { height: auto; min-height: 64px; flex-wrap: wrap; padding-top: 10px; }
+      .nav-logo { margin-right: auto; }
+      .nav-links { display: flex; order: 3; width: 100%; overflow-x: auto; flex: 0 0 100%; padding-bottom: 8px; }
+      .nav-link { flex: 0 0 auto; padding: 7px 10px; }
+      .ranking-table th:nth-child(n+6), .ranking-table td:nth-child(n+6) { display: none; }
+      .modal-dims { grid-template-columns: repeat(2, 1fr); }
+      .modal-scenario-grid { grid-template-columns: 1fr; }
+      .history-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .history-profile-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .history-hero { padding: 30px 22px; }
+    }
+    @media (max-width: 480px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+      section { padding: 40px 0; }
+      .history-grid { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- =================== NAVIGATION =================== -->
+<nav class="nav-bar" role="navigation" aria-label="Primary navigation">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo" onclick="showPage('ipl-rankings')" aria-label="Cricket Intelligence home">
+        <div class="nav-logo-icon" aria-hidden="true">🏏</div>
+        <span class="nav-logo-text">Cricket<span>IQ</span></span>
+      </a>
+      <div class="nav-links" role="menubar">
+        <button class="nav-link" role="menuitem" onclick="showPage('ipl-rankings')" id="nav-ipl-rankings">IPL Leaderboard</button>
+        <button class="nav-link" role="menuitem" onclick="showPage('player-comparison')" id="nav-player-comparison">Compare Players</button>
+        <button class="nav-link" role="menuitem" onclick="showPage('ranking-methodology')" id="nav-ranking-methodology">Methodology</button>
+      </div>
+      <div class="nav-actions">
+        <div class="nav-pill">SupeRR S2</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- =================== PAGE: IPL EXPERIENCE =================== -->
+<div id="page-experience" class="page">
+  <section>
+    <div class="container">
+      <div class="history-hero">
+        <div class="history-kicker">IPL history · provided data only</div>
+        <h1 class="t-h1">IPL Experience & Records</h1>
+        <p>Explore season results, player careers and recorded Player of the Match awards. Historical coverage is limited to the IPL seasons present in the supplied match data.</p>
+      </div>
+      <div id="ipl-history-error" class="history-error" hidden role="alert"></div>
+      <div id="ipl-history-content" hidden>
+        <div id="ipl-record-cards" class="history-grid" aria-label="IPL historical records"></div>
+        <div class="history-section">
+          <div class="history-section-heading">
+            <div>
+              <div class="section-eyebrow">Season timeline</div>
+              <h2>Tournament history</h2>
+            </div>
+            <label class="t-small">Explore season
+              <select id="ipl-season-select" class="history-select" onchange="renderIplSeason(this.value)" aria-label="Select IPL season"></select>
+            </label>
+          </div>
+          <div id="ipl-season-detail" class="history-panel history-season-card"></div>
+          <div id="ipl-season-timeline" class="history-grid"></div>
+        </div>
+        <div class="history-section">
+          <div class="history-section-heading">
+            <div>
+              <div class="section-eyebrow">Match awards</div>
+              <h2>Player of the Match records</h2>
+              <p class="t-small">Award counts reflect only non-missing awards recorded in the supplied IPL match file.</p>
+            </div>
+          </div>
+          <div class="history-panel">
+            <div class="history-filters">
+              <input id="pom-search" class="history-search" type="search" placeholder="Search a player…" oninput="renderPomHistory()" aria-label="Search Player of the Match awards by player">
+              <select id="pom-season" class="history-select" onchange="renderPomHistory()" aria-label="Filter Player of the Match awards by season"></select>
+              <select id="pom-team" class="history-select" onchange="renderPomHistory()" aria-label="Filter Player of the Match awards by team"></select>
+            </div>
+            <h3 style="font-family:var(--font-display);margin:8px 0 12px">Award leaderboard <span class="t-small">(recorded awards only)</span></h3>
+            <div class="history-table-scroll">
+              <table class="history-table">
+                <thead><tr><th>#</th><th>Player</th><th>Teams</th><th class="num">Recorded awards</th></tr></thead>
+                <tbody id="pom-leaderboard-body"></tbody>
+              </table>
+            </div>
+            <h3 style="font-family:var(--font-display);margin:24px 0 12px">Award match history</h3>
+            <div class="history-table-scroll">
+              <table class="history-table">
+                <thead><tr><th>Season / Match</th><th>Player</th><th>Team</th><th>Opponent</th><th>Match result</th><th>Recorded performance</th></tr></thead>
+                <tbody id="pom-history-body"></tbody>
+              </table>
+            </div>
+            <div id="pom-history-count" class="t-small" style="margin-top:12px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div><!-- /experience -->
+
+<!-- =================== PAGE: ORANGE CAP =================== -->
+<div id="page-orange" class="page">
+  <section>
+    <div class="container">
+      <div class="history-hero">
+        <div class="history-kicker cap-accent-orange">Orange Cap · batting records</div>
+        <h1 class="t-h1">Runs across IPL seasons</h1>
+        <p>Official Orange Cap winners are shown only when supported by a verified award source. This data pack contains seasonal batting totals, not official cap decisions.</p>
+      </div>
+      <div id="orange-history-error" class="history-error" hidden role="alert"></div>
+      <div id="orange-history-content" hidden>
+        <div class="history-note warning"><strong>Official winners unavailable.</strong> The provided dataset has no Orange Cap award records. The leaders below are calculated from the included IPL ball-by-ball data and are not represented as official award winners.</div>
+        <div class="history-note" style="margin-top:12px"><strong>All-time award counts and current-season race:</strong> unavailable. The source has completed season data through 2026 but contains no official cap awards or active-season race table.</div>
+        <div class="history-section">
+          <div class="history-section-heading">
+            <div><div class="section-eyebrow cap-accent-orange">Season records</div><h2>Season run leaders</h2></div>
+            <label class="t-small">Season
+              <select id="orange-season-select" class="history-select" onchange="renderOrangeCap(this.value)" aria-label="Select Orange Cap season"></select>
+            </label>
+          </div>
+          <div id="orange-season-card" class="history-panel"></div>
+          <div class="history-panel">
+            <div class="history-section-heading"><h2>All-time runs · included seasons only</h2></div>
+            <div class="history-table-scroll"><table class="history-table">
+              <thead><tr><th>#</th><th>Player</th><th>IPL teams</th><th class="num">Runs</th><th class="num">Matches</th><th class="num">Average</th><th class="num">Strike rate</th></tr></thead>
+              <tbody id="orange-alltime-body"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div><!-- /orange -->
+
+<!-- =================== PAGE: PURPLE CAP =================== -->
+<div id="page-purple" class="page">
+  <section>
+    <div class="container">
+      <div class="history-hero">
+        <div class="history-kicker cap-accent-purple">Purple Cap · bowling records</div>
+        <h1 class="t-h1">Wickets across IPL seasons</h1>
+        <p>Official Purple Cap winners are shown only when supported by a verified award source. This data pack contains seasonal bowling totals, not official cap decisions.</p>
+      </div>
+      <div id="purple-history-error" class="history-error" hidden role="alert"></div>
+      <div id="purple-history-content" hidden>
+        <div class="history-note warning"><strong>Official winners unavailable.</strong> The provided dataset has no Purple Cap award records. The leaders below are calculated from the included IPL ball-by-ball data and are not represented as official award winners.</div>
+        <div class="history-note" style="margin-top:12px"><strong>All-time award counts and current-season race:</strong> unavailable. The source has completed season data through 2026 but contains no official cap awards or active-season race table.</div>
+        <div class="history-section">
+          <div class="history-section-heading">
+            <div><div class="section-eyebrow cap-accent-purple">Season records</div><h2>Season wicket leaders</h2></div>
+            <label class="t-small">Season
+              <select id="purple-season-select" class="history-select" onchange="renderPurpleCap(this.value)" aria-label="Select Purple Cap season"></select>
+            </label>
+          </div>
+          <div id="purple-season-card" class="history-panel"></div>
+          <div class="history-panel">
+            <div class="history-section-heading"><h2>All-time wickets · included seasons only</h2></div>
+            <div class="history-table-scroll"><table class="history-table">
+              <thead><tr><th>#</th><th>Player</th><th>IPL teams</th><th class="num">Wickets</th><th class="num">Matches</th><th class="num">Average</th><th class="num">Economy</th><th class="num">Strike rate</th></tr></thead>
+              <tbody id="purple-alltime-body"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div><!-- /purple -->
+
+<!-- =================== IPL CAREER PROFILE =================== -->
+<div id="ipl-player-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="ipl-profile-name" onclick="closeIplPlayerProfile(event)">
+  <div class="modal-panel history-profile-panel">
+    <div class="modal-header">
+      <div class="modal-player-info">
+        <div class="modal-avatar" id="ipl-profile-avatar"></div>
+        <div>
+          <div class="modal-name" id="ipl-profile-name"></div>
+          <div class="modal-sub" id="ipl-profile-summary"></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeIplPlayerProfile()" aria-label="Close IPL career profile">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="ipl-profile-stats" class="history-profile-stats"></div>
+      <div id="ipl-profile-achievements" class="history-note"></div>
+      <div class="history-section-heading" style="margin-top:24px"><h2>Season-by-season performance</h2></div>
+      <div class="history-table-scroll">
+        <table class="history-table">
+          <thead><tr><th>Season</th><th>Teams</th><th class="num">Matches</th><th class="num">Runs</th><th class="num">Avg</th><th class="num">SR</th><th class="num">Wickets</th><th class="num">Econ</th><th class="num">POM</th></tr></thead>
+          <tbody id="ipl-profile-seasons"></tbody>
+        </table>
+      </div>
+      <div class="history-section-heading" style="margin-top:24px"><h2>Recorded Player of the Match awards</h2></div>
+      <div id="ipl-profile-awards"></div>
+    </div>
+  </div>
+</div>
+
+<!-- =================== OFFICIAL IPL PLAYER RANKINGS =================== -->
+<style>
+  .ranking-page { padding: 38px 0 64px; }
+  .ranking-page .container { max-width: 1440px; margin: 0 auto; padding: 0 20px; }
+  .ranking-heading { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 24px; }
+  .ranking-heading h1, .ranking-profile-heading h2 { margin: 4px 0; font-size: clamp(1.7rem, 3vw, 2.6rem); }
+  .ranking-eyebrow { color: #176B45; font-size: .75rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .ranking-summary, .ranking-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 18px 0; }
+  .ranking-summary article, .ranking-stats-grid article, .ranking-chart-grid article, .ranking-leader-card { padding: 16px; border: 1px solid #dfe7e2; border-radius: 12px; background: var(--surface, #fff); }
+  .ranking-summary span, .ranking-stats-grid span, .ranking-leader-card span { display: block; color: #65756a; font-size: .78rem; }
+  .ranking-summary strong, .ranking-stats-grid strong, .ranking-leader-card strong { display: block; margin-top: 6px; font-size: 1.15rem; }
+  .ranking-stats-grid small, .ranking-table small { display: block; color: #65756a; font-size: .75rem; }
+  .ranking-select, .ranking-button { min-height: 42px; padding: 8px 12px; border: 1px solid #cbd6ce; border-radius: 8px; background: var(--surface, #fff); color: inherit; }
+  .ranking-button { cursor: pointer; font-weight: 700; }
+  .ranking-quick-filters { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 8px; }
+  .ranking-quick-filters .is-active { border-color: var(--brand); background: var(--brand); color: #fff; }
+  .ranking-filter-note { margin: 0 0 14px; color: var(--text-secondary); font-size: .82rem; }
+  .ranking-table-scroll { width: 100%; overflow-x: auto; border: 1px solid #dfe7e2; border-radius: 12px; }
+  .ranking-table { width: 100%; min-width: 980px; border-collapse: collapse; background: var(--surface, #fff); }
+  .ranking-table th, .ranking-table td { padding: 11px 12px; border-bottom: 1px solid #e8eee9; text-align: left; vertical-align: middle; }
+  .ranking-table th { font-size: .78rem; white-space: nowrap; }
+  .ranking-table td { font-variant-numeric: tabular-nums; }
+  #ranking-table-body tr { cursor: pointer; }
+  #ranking-table-body tr:hover { background: rgba(23,107,69,.06); }
+  .ranking-leaders { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 20px 0; }
+  .ranking-leader-card { text-align: left; cursor: pointer; color: inherit; }
+  .ranking-leader-card small { display: block; margin-top: 5px; }
+  .ranking-chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 18px 0; }
+  .ranking-chart-grid article { min-height: 280px; }
+  .ranking-chart-grid canvas { width: 100% !important; height: 220px !important; }
+  .ranking-chart-grid h3, #ranking-profile h3 { margin: 0 0 12px; font-size: 1rem; }
+  .compare-picker { position: relative; max-width: 680px; margin-top: 12px; }
+  .compare-player-search { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid #cbd6ce; border-radius: 8px; background: var(--surface, #fff); color: inherit; }
+  .compare-search-results { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; right: 0; max-height: 280px; overflow-y: auto; border: 1px solid #cbd6ce; border-radius: 8px; background: var(--surface, #fff); box-shadow: var(--shadow-md); }
+  .compare-search-results[hidden] { display: none; }
+  .compare-search-results button { display: block; width: 100%; padding: 10px 12px; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+  .compare-search-results button:hover, .compare-search-results button:focus { background: var(--brand-muted); }
+  .compare-selected-heading { display: flex; align-items: center; gap: 12px; margin: 16px 0 8px; }
+  .compare-selected-players { display: flex; flex-wrap: wrap; gap: 8px; }
+  .compare-player-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px 6px 12px; border: 1px solid #cbd6ce; border-radius: 999px; background: var(--surface, #fff); }
+  .compare-player-chip button { width: 24px; height: 24px; border: 0; border-radius: 50%; background: var(--brand-muted); color: inherit; cursor: pointer; }
+  .compare-empty { padding: 10px 12px; color: var(--text-secondary); }
+  .ranking-profile-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 28px 0 12px; }
+  .ranking-profile-heading p { margin: 6px 0; }
+  .ranking-better { background: rgba(23,107,69,.13); color: #176B45; font-weight: 800; }
+  .ranking-error { padding: 14px; color: #8a1f11; background: #fff0ed; border-radius: 8px; }
+  @media (max-width: 640px) {
+    .ranking-heading, .ranking-profile-heading { align-items: flex-start; flex-direction: column; }
+    .ranking-page { padding-top: 24px; }
+  }
+  :root {
+    --bg: #f3f5f0;
+    --surface: #ffffff;
+    --surface-raised: #f8faf6;
+    --brand: #0e6045;
+    --brand-dark: #083d2e;
+    --brand-muted: #e7f1e9;
+    --lime: #d7ed9b;
+    --text-primary: #14251e;
+    --text-secondary: #65756c;
+    --border: #e0e7e0;
+    --border-strong: #c8d4c9;
+    --shadow-sm: 0 2px 8px rgba(20, 42, 30, .045);
+    --shadow-md: 0 12px 30px rgba(20, 42, 30, .075);
+    --shadow-lg: 0 22px 54px rgba(20, 42, 30, .13);
+  }
+  body {
+    background:
+      radial-gradient(ellipse at 8% 0%, rgba(218, 234, 215, .42), transparent 34rem),
+      var(--bg);
+    color: var(--text-primary);
+  }
+  .nav-bar {
+    background: rgba(255, 255, 255, .9);
+    border-bottom-color: rgba(205, 217, 207, .8);
+    box-shadow: 0 4px 20px rgba(21, 48, 34, .045);
+  }
+  .nav-inner { height: 72px; }
+  .nav-logo { margin-right: 36px; }
+  .nav-logo-icon {
+    background: linear-gradient(145deg, #146e4e, #0b4935);
+    box-shadow: 0 5px 12px rgba(14, 96, 69, .2);
+  }
+  .nav-link {
+    appearance: none;
+    border: 1px solid transparent;
+    background: transparent;
+    padding: 8px 14px;
+    font-weight: 600;
+  }
+  .nav-link:hover { background: #f2f6f1; }
+  .nav-link.active {
+    color: #0e6045;
+    background: #edf4ed;
+    border-color: #dbe8dc;
+  }
+  .nav-pill {
+    background: #123f30;
+    padding: 8px 15px;
+    letter-spacing: .01em;
+  }
+  .ranking-page { padding: 42px 0 72px; }
+  .ranking-page .container { max-width: 1320px; padding: 0 28px; }
+  .ranking-heading { margin-bottom: 28px; }
+  .ranking-heading h1, .ranking-profile-heading h2 {
+    letter-spacing: -.04em;
+    line-height: 1.08;
+  }
+  .ranking-eyebrow {
+    letter-spacing: .16em;
+    font-size: .7rem;
+  }
+  #page-ipl-rankings .ranking-heading {
+    position: relative;
+    min-height: 220px;
+    align-items: center;
+    padding: clamp(26px, 4vw, 48px);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 22px;
+    background:
+      radial-gradient(ellipse at 88% 18%, rgba(210, 235, 157, .2), transparent 26rem),
+      linear-gradient(118deg, #0c3f30 0%, #0e6045 58%, #1c7550 100%);
+    box-shadow: 0 20px 46px rgba(11, 62, 45, .2);
+  }
+  #page-ipl-rankings .ranking-heading::after {
+    content: "";
+    position: absolute;
+    right: 9%;
+    bottom: -180px;
+    width: 360px;
+    height: 360px;
+    border: 1px solid rgba(234, 245, 220, .16);
+    border-radius: 50%;
+    box-shadow: 0 0 0 34px rgba(234,245,220,.035), 0 0 0 70px rgba(234,245,220,.025);
+    pointer-events: none;
+  }
+  #page-ipl-rankings .ranking-heading > div,
+  #page-ipl-rankings .ranking-heading > button { position: relative; z-index: 1; }
+  #page-ipl-rankings .ranking-heading h1 {
+    max-width: 760px;
+    margin: 8px 0 12px;
+    color: #fff;
+    font-size: clamp(2.1rem, 4.5vw, 3.35rem);
+  }
+  #page-ipl-rankings .ranking-heading .ranking-eyebrow { color: #d7ed9b; }
+  #page-ipl-rankings .ranking-heading p:not(.ranking-eyebrow) {
+    max-width: 650px;
+    color: rgba(245, 250, 245, .78);
+    font-size: 1rem;
+  }
+  #page-ipl-rankings .ranking-heading > button {
+    border: 1px solid rgba(255,255,255,.5);
+    background: #f2f6e8;
+    color: #163d2f;
+    box-shadow: 0 8px 20px rgba(0,0,0,.12);
+  }
+  #page-ipl-rankings .ranking-heading > button:hover {
+    transform: translateY(-2px);
+    background: #fff;
+  }
+  .ranking-summary { gap: 14px; margin: 22px 0; }
+  .ranking-summary article {
+    min-height: 88px;
+    padding: 14px 18px;
+    border-color: rgba(213, 224, 214, .9);
+    border-radius: 16px;
+    background: linear-gradient(155deg, #fff, #fbfcf9);
+    box-shadow: var(--shadow-sm);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .ranking-summary article:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+  .ranking-summary span, .ranking-stats-grid span, .ranking-leader-card span {
+    color: #718077;
+    font-weight: 600;
+  }
+  .ranking-summary strong {
+    margin-top: 8px;
+    color: #173a2d;
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+    line-height: 1.25;
+    letter-spacing: -.035em;
+  }
+  #page-ipl-rankings h2 {
+    margin: 0 0 4px;
+    color: #173a2d;
+    font-size: clamp(1.35rem, 2vw, 1.65rem);
+    letter-spacing: -.025em;
+  }
+  .ranking-leaders {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 13px;
+    margin: 18px 0 24px;
+  }
+  .ranking-metric-leaders {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 900px;
+  }
+  .ranking-leader-card {
+    min-height: 124px;
+    padding: 18px;
+    border-color: #e0e8df;
+    border-radius: 15px;
+    background: linear-gradient(150deg, #fff, #fafcf8);
+    box-shadow: var(--shadow-sm);
+    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  .ranking-leader-card:hover {
+    transform: translateY(-3px);
+    border-color: #b7cfb6;
+    box-shadow: var(--shadow-md);
+  }
+  .ranking-leader-card strong {
+    margin-top: 10px;
+    color: #173a2d;
+    font-size: 1.08rem;
+    letter-spacing: -.02em;
+  }
+  .ranking-leader-card small { margin-top: 8px; color: #748178; }
+  .ranking-quick-filters { gap: 9px; margin: 26px 0 8px; }
+  .ranking-button {
+    min-height: 44px;
+    padding: 9px 16px;
+    border-color: #d5e0d5;
+    border-radius: 10px;
+    background: #fff;
+    color: #254537;
+    box-shadow: 0 2px 5px rgba(20,42,30,.035);
+    transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  .ranking-button:hover {
+    transform: translateY(-1px);
+    border-color: #9db99c;
+    box-shadow: var(--shadow-sm);
+  }
+  .ranking-quick-filters #ranking-top-batters,
+  .ranking-quick-filters #ranking-top-bowlers {
+    min-height: 54px;
+    padding: 12px 24px;
+    border: 2px solid #176b45;
+    background: linear-gradient(180deg, #f5fbf6, #e4f2e7);
+    color: #0e6045;
+    font-size: 1rem;
+    font-weight: 800;
+    box-shadow: 0 4px 12px rgba(14,96,69,.13);
+  }
+  .ranking-quick-filters #ranking-top-batters:hover,
+  .ranking-quick-filters #ranking-top-bowlers:hover {
+    transform: translateY(-2px);
+    border-color: #0e6045;
+    box-shadow: 0 7px 17px rgba(14,96,69,.2);
+  }
+  .ranking-quick-filters #ranking-top-batters:focus-visible,
+  .ranking-quick-filters #ranking-top-bowlers:focus-visible {
+    outline: 3px solid rgba(23,107,69,.3);
+    outline-offset: 3px;
+  }
+  .ranking-quick-filters #ranking-top-batters.is-active,
+  .ranking-quick-filters #ranking-top-bowlers.is-active {
+    border-color: #0e6045;
+    background: linear-gradient(135deg, #0e6045, #176b45);
+    color: #fff;
+    box-shadow: 0 0 0 3px #dcefe1, 0 8px 18px rgba(14,96,69,.24);
+  }
+  .ranking-quick-filters .is-active {
+    border-color: #0e6045;
+    background: #0e6045;
+    color: #fff;
+    box-shadow: 0 6px 15px rgba(14,96,69,.19);
+  }
+  .ranking-filter-note { margin: 4px 0 16px; color: #758178; font-size: .84rem; }
+  .ranking-table-scroll {
+    border-color: #dce5dc;
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(21,48,34,.045);
+  }
+  .ranking-table { background: #fff; }
+  .ranking-table th, .ranking-table td {
+    padding: 14px 15px;
+    border-bottom-color: #edf1ec;
+  }
+  .ranking-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #eff4ed;
+    color: #355342;
+    font-size: .74rem;
+    font-weight: 800;
+    letter-spacing: .055em;
+    text-transform: uppercase;
+  }
+  .ranking-table tbody tr { transition: background .16s ease; }
+  .ranking-table tbody tr:nth-child(even) { background: #fbfcfa; }
+  .ranking-table tbody tr:hover { background: #edf5ed; }
+  .ranking-table tbody td:first-child {
+    color: #587464;
+    font-weight: 800;
+  }
+  .ranking-table tbody td:nth-child(2) strong { color: #173a2d; font-weight: 700; }
+  .ranking-table small { margin-top: 3px; color: #7d8981; }
+  .ranking-better {
+    background: #e8f3e8;
+    color: #14583e;
+    font-weight: 800;
+  }
+  #page-player-comparison .ranking-heading,
+  #page-ranking-methodology .ranking-heading {
+    padding: 30px 34px;
+    border: 1px solid #e0e8df;
+    border-radius: 18px;
+    background:
+      radial-gradient(ellipse at 92% 10%, rgba(218, 234, 215, .68), transparent 25rem),
+      linear-gradient(120deg, #fff, #f8fbf6);
+    box-shadow: var(--shadow-sm);
+  }
+  #page-player-comparison .ranking-heading p:not(.ranking-eyebrow),
+  #page-ranking-methodology .ranking-heading p:not(.ranking-eyebrow) {
+    margin-top: 9px;
+    color: var(--text-secondary);
+  }
+  .compare-picker { max-width: 720px; margin-top: 14px; }
+  .compare-player-search {
+    border-color: #d3dfd4;
+    border-radius: 11px;
+    box-shadow: var(--shadow-sm);
+  }
+  .compare-player-search:focus {
+    outline: 3px solid rgba(14,96,69,.14);
+    border-color: #5b966f;
+  }
+  .compare-search-results {
+    border-color: #d6e1d6;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+  }
+  .compare-search-results button { padding: 12px 14px; }
+  .compare-selected-heading { margin-top: 20px; }
+  .compare-player-chip {
+    border-color: #dce6dc;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+  .compare-player-chip button:hover { background: #d9e8d8; }
+  .ranking-chart-grid article {
+    border-color: #e0e8df;
+    border-radius: 15px;
+    box-shadow: var(--shadow-sm);
+  }
+  .ranking-chart-grid h3, #ranking-profile h3 { color: #244535; }
+  #ranking-profile {
+    margin-top: 28px;
+    padding: clamp(18px, 3vw, 30px);
+    border: 1px solid #dfe8de;
+    border-radius: 18px;
+    background: rgba(255,255,255,.78);
+    box-shadow: var(--shadow-md);
+  }
+  .ranking-stats-grid article {
+    border-color: #e0e8df;
+    border-radius: 14px;
+    background: linear-gradient(150deg, #fff, #fafcf8);
+  }
+  .footer {
+    border-top: 1px solid #e0e8df;
+    background: rgba(255,255,255,.74);
+  }
+  @media (max-width: 1100px) {
+    .ranking-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 900px) {
+    .nav-logo { margin-right: 18px; }
+    .ranking-leaders { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 640px) {
+    .nav-inner { min-height: 68px; }
+    .nav-links { gap: 4px; }
+    .ranking-page .container { padding: 0 16px; }
+    #page-ipl-rankings .ranking-heading { min-height: 0; border-radius: 17px; }
+    #page-ipl-rankings .ranking-heading::after { right: -210px; }
+    .ranking-summary { gap: 10px; }
+    .ranking-summary article { min-height: 88px; padding: 12px 14px; border-radius: 13px; }
+    .ranking-leaders { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .ranking-leader-card { min-height: 112px; padding: 14px; }
+    #page-player-comparison .ranking-heading,
+    #page-ranking-methodology .ranking-heading { padding: 24px 20px; }
+  }
+  @media (max-width: 420px) {
+    .ranking-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ranking-leaders { grid-template-columns: 1fr; }
+    .ranking-quick-filters .ranking-button { flex: 1 1 auto; }
+  }
+</style>
+<div id="page-ipl-rankings" class="page active ranking-page">
+  <div class="container">
+    <div class="ranking-heading">
+      <div><p class="ranking-eyebrow">2022–2026 · IPL only</p><h1>Official IPL Player Leaderboard</h1>
+      <p>Coverage-aware six-category ranking (90%) plus the role-specific strike-rate or economy component (10%), based only on the attached IPL data.</p></div>
+      <button id="ranking-compare-button" class="ranking-button" type="button">Compare players</button>
+    </div>
+    <div id="ranking-error" class="ranking-error" hidden role="alert"></div>
+    <div id="ranking-summary" class="ranking-summary"></div>
+    <h2>Top performer by category</h2>
+    <div id="category-leaders" class="ranking-leaders"></div>
+    <h2>Strike rate &amp; economy leaders</h2>
+    <p class="ranking-filter-note">Each role's overall strike rate or economy is a standalone 10% component outside the six categories.</p>
+    <div id="metric-leaders" class="ranking-leaders ranking-metric-leaders"></div>
+    <div class="ranking-quick-filters" role="group" aria-label="Quick leaderboard filters">
+      <button id="ranking-top-batters" class="ranking-button" type="button" aria-pressed="false">Top 10 Batters</button>
+      <button id="ranking-top-bowlers" class="ranking-button" type="button" aria-pressed="false">Top 10 Bowlers</button>
+    </div>
+    <p id="ranking-filter-note" class="ranking-filter-note"></p>
+    <div class="ranking-table-scroll">
+      <table class="ranking-table" aria-label="Official IPL player leaderboard">
+        <thead><tr><th>Rank</th><th>Player</th><th>Final score</th>
+          <th class="batting-strike-rate-column">Batting SR (role component)</th>
+          <th class="bowling-economy-column">Bowling economy (role component)</th>
+          <th>Traditional 15%</th><th>Pressure 25%</th><th>Impact 17%</th>
+          <th>Important 15%</th><th>Consistency 10%</th><th>Game intelligence 8%</th></tr></thead>
+        <tbody id="ranking-table-body"></tbody>
+      </table>
+    </div>
+    <section id="ranking-profile" hidden aria-live="polite"></section>
+  </div>
+</div>
+<div id="page-player-comparison" class="page ranking-page">
+  <div class="container">
+    <div class="ranking-heading"><div><p class="ranking-eyebrow">Player analysis</p><h1>Player comparison</h1>
+      <p>Search for players and select them one at a time. Compare any two or more.</p></div></div>
+    <label for="compare-player-search">Add a player</label>
+    <div class="compare-picker">
+      <input id="compare-player-search" class="compare-player-search" type="search" role="combobox"
+        aria-autocomplete="list" aria-expanded="false" aria-controls="compare-search-results"
+        placeholder="Type a player name…" autocomplete="off">
+      <div id="compare-search-results" class="compare-search-results" role="listbox" hidden></div>
+    </div>
+    <div class="compare-selected-heading">
+      <strong id="compare-selection-count" aria-live="polite"></strong>
+      <button id="compare-clear-players" class="ranking-button" type="button">Clear selection</button>
+    </div>
+    <div id="compare-selected-players" class="compare-selected-players"></div>
+    <p id="compare-selection-message" class="ranking-filter-note" role="status"></p>
+    <div class="ranking-chart-grid"><article><h3>Final score and six categories</h3><canvas id="comparison-chart"></canvas></article></div>
+    <div id="comparison-results"></div>
+  </div>
+</div>
+<div id="page-ranking-methodology" class="page ranking-page">
+  <div class="container">
+    <div class="ranking-heading"><div><p class="ranking-eyebrow">Official scoring framework</p><h1>How IPL players are ranked</h1>
+      <p>All leaderboard views use one shared scoring engine and the supplied IPL dataset.</p></div></div>
+    <div id="ranking-weight-table" class="ranking-table-scroll"></div>
+    <div id="ranking-role-weight-table" class="ranking-table-scroll"></div>
+    <div class="ranking-chart-grid">
+      <article><h3>Coverage-aware scoring</h3>
+        <p>Each metric is normalized among players in its role with robust 5th–95th percentile bounds. Lower-is-better metrics are inverted. Minimum samples and shrinkage toward a neutral value reduce small-sample extremes.</p>
+        <p>Unavailable metrics remain unavailable. They are never imputed as zero or full marks. A category score is reduced by the share of its expected metrics supported by data, and missing category weight is not reassigned to other categories.</p>
+        <p>The final score uses the six weighted categories and the role-specific rate component. Consistency, Pressure Performance, and Match Impact are separate indicators and are not added to the final score.</p>
+      </article>
+      <article><h3>Observed source data</h3>
+        <p>Player batting and bowling events, required run rates, wickets in hand, innings/over state, pace or spin, batter handedness, match results, match stages, match dates, and recorded Player-of-the-Match IDs.</p>
+        <p>Derived estimates include close finishes, last-over outcomes, top-four opponent strength, home/away balance, multi-season consistency, batting-position diversity, and expensive spells.</p>
+      </article>
+      <article><h3>Unavailable in the source</h3>
+        <p>Fielder-attributed catches and run-outs, stumpings by keeper, dropped catches, runs saved, pitch conditions, and must-win labels. These remain unscored and are identified in profile metric evidence.</p>
+        <p>The published coverage is 2022–2026 IPL only; it is not an all-time IPL leaderboard.</p>
+      </article>
+    </div>
+    <div id="ranking-definition-list" class="ranking-leaders"></div>
+  </div>
+</div>
+
+<!-- =================== FOOTER =================== -->
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-logo">Cricket<span>IQ</span></div>
+        <div class="footer-text" style="margin-top:6px">SupeRR Selector Season 2 · Rajasthan Royals</div>
+      </div>
+      <div class="footer-text" id="footer-ranking-scope" style="text-align:center">
+        Official IPL player rankings · 2022–2026
+      </div>
+      <div class="footer-badge">🏏 Data-driven · No reputation bias</div>
+    </div>
+  </div>
+</footer>
+
+<!-- =================== JAVASCRIPT =================== -->
+<script>
+
+/* ---- IPL HISTORY DATA ---- */
+let IPL_HISTORY = null;
+let iplHistoryPromise = null;
+
+function escapeHistoryText(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[char]));
+}
+
+function historyNumber(value, decimals = 0) {
+  if (value === null || value === undefined || !Number.isFinite(Number(value))) return '—';
+  return Number(value).toLocaleString(undefined, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+}
+
+function historyPlayerLink(id, name) {
+  return `<button class="history-player-link" onclick="openIplPlayerProfile(${Number(id)})">${escapeHistoryText(name)}</button>`;
+}
+
+async function ensureIplHistory() {
+  if (!iplHistoryPromise) {
+    iplHistoryPromise = fetch('/api/ipl-history')
+      .then(response => {
+        if (!response.ok) throw new Error(`History API returned HTTP ${response.status}`);
+        return response.json();
+      })
+      .then(data => {
+        if (!Array.isArray(data.players) || !Array.isArray(data.seasons) || !Array.isArray(data.playerOfMatchAwards)) {
+          throw new Error('History API response is missing required IPL datasets');
+        }
+        IPL_HISTORY = data;
+        initializeIplHistory();
+      })
+      .catch(error => {
+        iplHistoryPromise = null;
+        console.error('Unable to load IPL history:', error);
+        document.querySelectorAll('.history-error').forEach(element => {
+          element.textContent = `IPL history could not be loaded. ${error.message}. Check that the history data has been built and the server is available.`;
+          element.hidden = false;
+        });
+      });
+  }
+  return iplHistoryPromise;
+}
+
+function initializeIplHistory() {
+  const seasons = [...IPL_HISTORY.seasons].sort((a, b) => b.season - a.season);
+  const seasonOptions = seasons.map(row =>
+    `<option value="${row.season}">${row.season}</option>`
+  ).join('');
+  ['ipl-season-select', 'orange-season-select', 'purple-season-select'].forEach(id => {
+    const select = document.getElementById(id);
+    if (select) select.innerHTML = seasonOptions;
+  });
+
+  const awardSeason = document.getElementById('pom-season');
+  awardSeason.innerHTML = `<option value="all">All seasons</option>${seasonOptions}`;
+  const teamNames = [...new Set(IPL_HISTORY.playerOfMatchAwards.map(row => row.team).filter(Boolean))].sort();
+  document.getElementById('pom-team').innerHTML =
+    `<option value="all">All teams</option>${teamNames.map(team =>
+      `<option value="${escapeHistoryText(team)}">${escapeHistoryText(team)}</option>`
+    ).join('')}`;
+
+  ['ipl-history-content', 'orange-history-content', 'purple-history-content'].forEach(id => {
+    document.getElementById(id).hidden = false;
+  });
+  document.querySelectorAll('.history-error').forEach(element => {
+    element.hidden = true;
+    element.textContent = '';
+  });
+  renderIplRecords();
+  renderIplSeason(seasons[0]?.season);
+  renderIplTimeline();
+  renderPomHistory();
+  renderOrangeCap(seasons[0]?.season);
+  renderPurpleCap(seasons[0]?.season);
+}
+
+function renderIplRecords() {
+  const records = IPL_HISTORY.records;
+  const top = (list, key) => list?.[0] || null;
+  const card = (label, entry, valueKey, note, unavailable = false) => {
+    const rawValue = entry && ['championshipSeasons', 'finalAppearanceSeasons'].includes(valueKey)
+      ? entry[valueKey].length
+      : entry?.[valueKey];
+    const value = unavailable ? 'Unavailable' : entry ? historyNumber(rawValue) : '—';
+    const player = entry && !unavailable
+      ? `<div class="history-card-note">${historyPlayerLink(entry.id, entry.name)}</div>`
+      : `<div class="history-card-note">${escapeHistoryText(note)}</div>`;
+    return `<article class="history-card"><div class="history-card-label">${escapeHistoryText(label)}</div><div class="history-card-value">${value}</div>${player}</article>`;
+  };
+  document.getElementById('ipl-record-cards').innerHTML = [
+    card('Most runs · 2022–2026', top(records.runs), 'runs', 'IPL runs in included seasons'),
+    card('Most wickets · 2022–2026', top(records.wickets), 'wickets', 'IPL wickets in included seasons'),
+    card('Most recorded Player of the Match', top(records.playerOfMatch), 'playerOfMatchAwards', 'Recorded awards only'),
+    card('Most seasons played', top(records.seasons), 'seasonsPlayed', 'Of 5 included IPL seasons'),
+    card('Most matches played', top(records.matches), 'matches', 'Appearance-list match counts'),
+    card('Most title-winning finals', top(records.championshipSeasons), 'championshipSeasons', 'Player appeared in the winning final lineup'),
+    card('Most final appearances', top(records.finalAppearances), 'finalAppearanceSeasons', 'Final lineups from supplied match data'),
+    card('Most Orange Cap awards', null, null, 'Official award history not in source data', true),
+    card('Most Purple Cap awards', null, null, 'Official award history not in source data', true)
+  ].join('');
+}
+
+function renderIplSeason(seasonValue) {
+  if (!IPL_HISTORY) return;
+  const season = IPL_HISTORY.seasons.find(row => row.season === Number(seasonValue));
+  if (!season) return;
+  const final = season.final;
+  const winnerLine = final
+    ? `<strong>${escapeHistoryText(final.winner || 'Unavailable')}</strong> beat ${escapeHistoryText(final.runnerUp || 'Unavailable')}.`
+    : 'Final result is not available in the source data.';
+  const venue = final?.venueName
+    ? escapeHistoryText(final.venueName)
+    : final?.venueId ? `Venue name unavailable (source venue ID ${final.venueId})` : 'Venue unavailable';
+  const seasonRunLeader = season.runLeaders[0];
+  const seasonWicketLeader = season.wicketLeaders[0];
+  const seasonRunLeaders = season.runLeaders.filter(row => row.runs === seasonRunLeader?.runs);
+  const seasonWicketLeaders = season.wicketLeaders.filter(row => row.wickets === seasonWicketLeader?.wickets);
+  const runLeaderNames = seasonRunLeaders.map(row => historyPlayerLink(row.playerId, row.playerName)).join(', ');
+  const wicketLeaderNames = seasonWicketLeaders.map(row => historyPlayerLink(row.playerId, row.playerName)).join(', ');
+  document.getElementById('ipl-season-detail').innerHTML = `
+    <h3>IPL ${season.season} <span class="history-team-chip">${season.matchCount} matches</span></h3>
+    <div class="history-season-result">${winnerLine} Final: ${escapeHistoryText(final?.result || 'Unavailable')}<br>
+      Date: ${escapeHistoryText(final?.date || 'Unavailable')} · ${venue}<br>
+      Teams (${season.teams.length}): ${season.teams.map(team => `<span class="history-team-chip">${escapeHistoryText(team)}</span>`).join('')}
+    </div>
+    <div class="history-grid" style="margin-top:16px">
+      <div class="history-card"><div class="history-card-label">Most runs · calculated</div><div class="history-card-value">${historyNumber(seasonRunLeader?.runs)}</div><div class="history-card-note">${runLeaderNames || 'Unavailable'} · not an official Orange Cap result</div></div>
+      <div class="history-card"><div class="history-card-label">Most wickets · calculated</div><div class="history-card-value">${historyNumber(seasonWicketLeader?.wickets)}</div><div class="history-card-note">${wicketLeaderNames || 'Unavailable'} · not an official Purple Cap result</div></div>
+      <div class="history-card"><div class="history-card-label">Recorded POM awards</div><div class="history-card-value">${historyNumber(season.playerOfMatchAwardsRecorded)}</div><div class="history-card-note">${historyNumber(season.playerOfMatchMatchesMissing)} match awards missing in source</div></div>
+      <div class="history-card"><div class="history-card-label">Final venue</div><div class="history-card-value" style="font-size:1rem">${venue}</div><div class="history-card-note">${final ? `Match ${final.matchNumber ?? '—'}` : 'Final details unavailable'}</div></div>
+    </div>`;
+}
+
+function renderIplTimeline() {
+  const seasons = [...IPL_HISTORY.seasons].sort((a, b) => a.season - b.season);
+  const maxMatches = Math.max(...seasons.map(row => row.matchCount), 1);
+  document.getElementById('ipl-season-timeline').innerHTML = seasons.map(season => `
+    <button class="history-card" style="text-align:left;cursor:pointer" onclick="document.getElementById('ipl-season-select').value='${season.season}';renderIplSeason('${season.season}')">
+      <div class="history-card-label">IPL ${season.season} · ${season.matchCount} matches</div>
+      <div style="height:6px;background:var(--bg);border-radius:8px;margin:12px 0;overflow:hidden"><div style="height:100%;width:${season.matchCount / maxMatches * 100}%;background:var(--brand);border-radius:8px"></div></div>
+      <div class="history-card-note">${escapeHistoryText(season.final?.winner || 'Final winner unavailable')}</div>
+    </button>`).join('');
+}
+
+function formatAwardPerformance(performance) {
+  if (!performance) return 'Unavailable';
+  const parts = [];
+  if (performance.batting) {
+    const batting = performance.batting;
+    parts.push(`${batting.runs} off ${batting.balls}${batting.fours || batting.sixes ? ` (${batting.fours}x4, ${batting.sixes}x6)` : ''}`);
+  }
+  if (performance.bowling) {
+    const bowling = performance.bowling;
+    const overs = `${Math.floor(bowling.balls / 6)}.${bowling.balls % 6}`;
+    parts.push(`${bowling.wickets}/${bowling.runs} in ${overs} overs`);
+  }
+  return parts.length ? parts.join(' · ') : 'Unavailable';
+}
+
+function renderPomHistory() {
+  if (!IPL_HISTORY) return;
+  const query = document.getElementById('pom-search').value.trim().toLocaleLowerCase();
+  const season = document.getElementById('pom-season').value;
+  const team = document.getElementById('pom-team').value;
+  const entries = IPL_HISTORY.playerOfMatchAwards.filter(row =>
+    (!query || row.playerName.toLocaleLowerCase().includes(query))
+    && (season === 'all' || row.season === Number(season))
+    && (team === 'all' || row.team === team)
+  );
+  const counts = new Map();
+  entries.forEach(row => counts.set(row.playerId, (counts.get(row.playerId) || 0) + 1));
+  const playerById = new Map(IPL_HISTORY.players.map(player => [player.id, player]));
+  const leaderboard = [...counts.entries()]
+    .map(([playerId, count]) => ({ player: playerById.get(playerId), count }))
+    .filter(row => row.player)
+    .sort((a, b) => b.count - a.count || a.player.name.localeCompare(b.player.name))
+    .slice(0, 50);
+  document.getElementById('pom-leaderboard-body').innerHTML = leaderboard.length
+    ? leaderboard.map((row, index) => `<tr><td>${index + 1}</td><td>${historyPlayerLink(row.player.id, row.player.name)}</td><td>${row.player.teams.map(name => `<span class="history-team-chip">${escapeHistoryText(name)}</span>`).join('')}</td><td class="num">${row.count}</td></tr>`).join('')
+    : '<tr><td class="history-empty" colspan="4">No awards match these filters.</td></tr>';
+  document.getElementById('pom-history-body').innerHTML = entries.length ? entries.map(row => `
+    <tr>
+      <td>${row.season} · #${row.matchNumber ?? '—'}</td>
+      <td>${historyPlayerLink(row.playerId, row.playerName)}</td>
+      <td>${escapeHistoryText(row.team || 'Unavailable')}</td>
+      <td>${escapeHistoryText(row.opponent || 'Unavailable')}</td>
+      <td>${escapeHistoryText(row.result || 'Unavailable')}</td>
+      <td>${escapeHistoryText(formatAwardPerformance(row.performance))}</td>
+    </tr>`).join('') : '<tr><td class="history-empty" colspan="6">No recorded awards match these filters.</td></tr>';
+  document.getElementById('pom-history-count').textContent =
+    `Showing ${entries.length} recorded awards. ${IPL_HISTORY.metadata.playerOfMatchMatchesMissing} IPL matches have no Player of the Match ID in the source data.`;
+}
+
+function seasonLeaderRows(rows, category) {
+  return rows.map((row, index) => `<tr>
+    <td>${index + 1}</td>
+    <td>${historyPlayerLink(row.playerId, row.playerName)}</td>
+    <td>${escapeHistoryText(row.team || 'Unavailable')}</td>
+    <td class="num">${historyNumber(row[category === 'runs' ? 'runs' : 'wickets'])}</td>
+    <td class="num">${historyNumber(row.matches)}</td>
+    <td class="num">${historyNumber(row.average, 2)}</td>
+    <td class="num">${historyNumber(category === 'runs' ? row.strikeRate : row.economy, 2)}</td>
+    ${category === 'runs' ? `<td class="num">${historyNumber(row.fours)} / ${historyNumber(row.sixes)}</td>` : `<td class="num">${historyNumber(row.strikeRate, 2)}</td>`}
+  </tr>`).join('');
+}
+
+function renderOrangeCap(seasonValue) {
+  if (!IPL_HISTORY) return;
+  const season = IPL_HISTORY.seasons.find(row => row.season === Number(seasonValue));
+  if (!season) return;
+  const leader = season.runLeaders[0];
+  const leaders = season.runLeaders.filter(row => row.runs === leader?.runs);
+  document.getElementById('orange-season-card').innerHTML = `
+    <div class="history-section-heading"><div><div class="history-card-label">Official Orange Cap · ${season.season}</div><h2 class="cap-accent-orange">${season.officialAwards.orangeCapWinner || 'Official winner unavailable'}</h2></div>
+      <div class="history-card-note">No verified award record in the supplied dataset.</div></div>
+    ${leader ? `<div class="history-note"><strong>Dataset run leader${leaders.length > 1 ? 's' : ''}:</strong> ${leaders.map(row => `${historyPlayerLink(row.playerId, row.playerName)} (${escapeHistoryText(row.team)})`).join(', ')} · ${historyNumber(leader.runs)} runs. Tied run totals remain tied; these are calculated statistics, not official award results.</div>` : ''}
+    <div class="history-table-scroll" style="margin-top:14px"><table class="history-table">
+      <thead><tr><th>#</th><th>Season run leader</th><th>Team</th><th class="num">Runs</th><th class="num">Matches</th><th class="num">Average</th><th class="num">Strike rate</th><th class="num">4s / 6s</th></tr></thead>
+      <tbody>${seasonLeaderRows(season.runLeaders.slice(0, 10), 'runs')}</tbody>
+    </table></div>`;
+  document.getElementById('orange-alltime-body').innerHTML = IPL_HISTORY.records.runs.map((player, index) => {
+    const matches = player.matches;
+    const avg = player.dismissals ? player.runs / player.dismissals : null;
+    const sr = player.ballsFaced ? player.runs * 100 / player.ballsFaced : null;
+    return `<tr><td>${index + 1}</td><td>${historyPlayerLink(player.id, player.name)}</td><td>${player.teams.map(team => `<span class="history-team-chip">${escapeHistoryText(team)}</span>`).join('')}</td><td class="num">${historyNumber(player.runs)}</td><td class="num">${historyNumber(matches)}</td><td class="num">${historyNumber(avg, 2)}</td><td class="num">${historyNumber(sr, 2)}</td></tr>`;
+  }).join('');
+}
+
+function renderPurpleCap(seasonValue) {
+  if (!IPL_HISTORY) return;
+  const season = IPL_HISTORY.seasons.find(row => row.season === Number(seasonValue));
+  if (!season) return;
+  const leader = season.wicketLeaders[0];
+  const leaders = season.wicketLeaders.filter(row => row.wickets === leader?.wickets);
+  document.getElementById('purple-season-card').innerHTML = `
+    <div class="history-section-heading"><div><div class="history-card-label">Official Purple Cap · ${season.season}</div><h2 class="cap-accent-purple">${season.officialAwards.purpleCapWinner || 'Official winner unavailable'}</h2></div>
+      <div class="history-card-note">No verified award record in the supplied dataset.</div></div>
+    ${leader ? `<div class="history-note"><strong>Dataset wicket leader${leaders.length > 1 ? 's' : ''}:</strong> ${leaders.map(row => `${historyPlayerLink(row.playerId, row.playerName)} (${escapeHistoryText(row.team)})`).join(', ')} · ${historyNumber(leader.wickets)} wickets. Tied wicket totals remain tied; these are calculated statistics, not official award results.</div>` : ''}
+    <div class="history-table-scroll" style="margin-top:14px"><table class="history-table">
+      <thead><tr><th>#</th><th>Season wicket leader</th><th>Team</th><th class="num">Wickets</th><th class="num">Matches</th><th class="num">Average</th><th class="num">Economy</th><th class="num">Strike rate</th></tr></thead>
+      <tbody>${seasonLeaderRows(season.wicketLeaders.slice(0, 10), 'wickets')}</tbody>
+    </table></div>`;
+  document.getElementById('purple-alltime-body').innerHTML = IPL_HISTORY.records.wickets.map((player, index) => {
+    const matches = player.seasonStats.reduce((total, row) => total + row.matches, 0);
+    const conceded = player.seasonStats.reduce((total, row) => total + row.runsConceded, 0);
+    const balls = player.seasonStats.reduce((total, row) => total + row.ballsBowled, 0);
+    return `<tr><td>${index + 1}</td><td>${historyPlayerLink(player.id, player.name)}</td><td>${player.teams.map(team => `<span class="history-team-chip">${escapeHistoryText(team)}</span>`).join('')}</td><td class="num">${historyNumber(player.wickets)}</td><td class="num">${historyNumber(matches)}</td><td class="num">${historyNumber(player.wickets ? conceded / player.wickets : null, 2)}</td><td class="num">${historyNumber(balls ? conceded * 6 / balls : null, 2)}</td><td class="num">${historyNumber(player.wickets ? balls / player.wickets : null, 2)}</td></tr>`;
+  }).join('');
+}
+
+function openIplPlayerProfile(playerId) {
+  if (!IPL_HISTORY) return;
+  const player = IPL_HISTORY.players.find(row => row.id === Number(playerId));
+  if (!player) return;
+  const awards = IPL_HISTORY.playerOfMatchAwards.filter(row => row.playerId === player.id);
+  document.getElementById('ipl-profile-avatar').textContent = getInitials(player.name);
+  document.getElementById('ipl-profile-avatar').style.background = getAvatarColor(player.id % 10 || 1);
+  document.getElementById('ipl-profile-name').textContent = player.name;
+  document.getElementById('ipl-profile-summary').textContent =
+    `IPL debut ${player.debutSeason ?? 'unavailable'} · ${player.seasonsPlayed} included seasons · ${player.matches} matches`;
+  const stats = [
+    ['Debut season', player.debutSeason ?? '—'],
+    ['Seasons played', player.seasonsPlayed],
+    ['Matches', player.matches],
+    ['Runs', player.runs],
+    ['Wickets', player.wickets],
+    ['Player of the Match', player.playerOfMatchAwards],
+    ['Orange Cap awards', 'Unavailable'],
+    ['Purple Cap awards', 'Unavailable']
+  ];
+  document.getElementById('ipl-profile-stats').innerHTML = stats.map(([label, value]) =>
+    `<div class="history-card"><div class="history-card-label">${escapeHistoryText(label)}</div><div class="history-card-value" style="font-size:${value === 'Unavailable' ? '.95rem' : '1.25rem'}">${escapeHistoryText(value)}</div></div>`
+  ).join('');
+  document.getElementById('ipl-profile-achievements').innerHTML = `
+    <strong>Teams:</strong> ${player.teams.map(team => `<span class="history-team-chip">${escapeHistoryText(team)}</span>`).join('') || 'Unavailable'}<br>
+    <strong>Final appearances:</strong> ${player.finalAppearanceSeasons.length ? player.finalAppearanceSeasons.join(', ') : 'None recorded in included seasons'}<br>
+    <strong>Title-winning final appearances:</strong> ${player.championshipSeasons.length ? player.championshipSeasons.join(', ') : 'None recorded in included seasons'}<br>
+    <strong>Official cap achievements:</strong> unavailable in source data. Award winner history is not inferred from statistical leaders.<br>
+    <strong>Images and seasons before 2022:</strong> unavailable in the provided dataset.`;
+  document.getElementById('ipl-profile-seasons').innerHTML = player.seasonStats.length
+    ? player.seasonStats.map(row => `<tr>
+      <td>${row.season}</td><td>${row.teams.map(team => `<span class="history-team-chip">${escapeHistoryText(team)}</span>`).join('')}</td>
+      <td class="num">${row.matches}</td><td class="num">${historyNumber(row.runs)}</td>
+      <td class="num">${historyNumber(row.average, 2)}</td><td class="num">${historyNumber(row.strikeRate, 2)}</td>
+      <td class="num">${historyNumber(row.wickets)}</td><td class="num">${historyNumber(row.economy, 2)}</td>
+      <td class="num">${row.playerOfMatchAwards}</td></tr>`).join('')
+    : '<tr><td class="history-empty" colspan="9">No season-by-season playing records are available.</td></tr>';
+  document.getElementById('ipl-profile-awards').innerHTML = awards.length
+    ? `<div class="history-table-scroll"><table class="history-table"><thead><tr><th>Season / match</th><th>Team</th><th>Opponent</th><th>Result</th><th>Performance</th></tr></thead><tbody>${awards.map(row =>
+      `<tr><td>${row.season} · #${row.matchNumber ?? '—'}</td><td>${escapeHistoryText(row.team || 'Unavailable')}</td><td>${escapeHistoryText(row.opponent || 'Unavailable')}</td><td>${escapeHistoryText(row.result || 'Unavailable')}</td><td>${escapeHistoryText(formatAwardPerformance(row.performance))}</td></tr>`
+    ).join('')}</tbody></table></div>`
+    : '<div class="history-empty">No recorded Player of the Match awards for this player in the included seasons.</div>';
+  document.getElementById('ipl-player-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeIplPlayerProfile(event) {
+  if (event && event.target !== document.getElementById('ipl-player-modal')) return;
+  document.getElementById('ipl-player-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ---- PAGE NAVIGATION ---- */
+const PAGES = ['ipl-rankings','player-comparison','ranking-methodology'];
+function showPage(id) {
+  PAGES.forEach(p => {
+    document.getElementById('page-' + p)?.classList.toggle('active', p === id);
+    const btn = document.getElementById('nav-' + p);
+    if (btn) btn.classList.toggle('active', p === id);
+  });
+  window.scrollTo(0, 0);
+}
+
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') closeIplPlayerProfile();
+});
+</script>
+<script src="/ranking.js"></script>
+</body>
+</html>

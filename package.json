@@ -1,0 +1,22 @@
+{
+  "name": "superr-selector-dashboard",
+  "version": "1.0.0",
+  "description": "Rajasthan Royals SupeRR Selector Season 2 Analytics Dashboard",
+  "main": "server.js",
+  "scripts": {
+    "build:ipl-history": "python build_ipl_history.py",
+    "build:rankings": "python -m engine.run_evaluation_pipeline",
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "cricket",
+    "ipl",
+    "t20",
+    "analytics",
+    "dashboard",
+    "rajasthan-royals"
+  ],
+  "author": "Antigravity Cricket Engine",
+  "license": "ISC"
+}
