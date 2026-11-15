@@ -508,7 +508,7 @@
     hideLegacyRankingPages();
     showPage('ipl-rankings');
     try {
-      const response = await fetch('/api/rankings', { cache: 'no-store' });
+      const response = await fetch('/dashboard_data.json', { cache: 'no-store' });
       if (!response.ok) throw new Error(`Ranking data request failed (${response.status}).`);
       data = await response.json();
       if (!Array.isArray(data.players) || !data.players.length) throw new Error('Ranking data contains no player leaderboard.');
@@ -562,7 +562,7 @@
       document.getElementById('nav-ranking-methodology').addEventListener('click', () => showPage('ranking-methodology'));
       document.getElementById('ranking-compare-button').addEventListener('click', () => showPage('player-comparison'));
     } catch (error) {
-      showError(`${error.message} Start the existing Node server and run the IPL ranking pipeline first.`);
+      showError(`${error.message} Check that the dashboard data file is deployed.`);
     }
   }
 

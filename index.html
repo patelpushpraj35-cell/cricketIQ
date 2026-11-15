@@ -1611,7 +1611,7 @@ function historyPlayerLink(id, name) {
 
 async function ensureIplHistory() {
   if (!iplHistoryPromise) {
-    iplHistoryPromise = fetch('/api/ipl-history')
+    iplHistoryPromise = fetch('/ipl_history_data.json')
       .then(response => {
         if (!response.ok) throw new Error(`History API returned HTTP ${response.status}`);
         return response.json();
@@ -1627,7 +1627,7 @@ async function ensureIplHistory() {
         iplHistoryPromise = null;
         console.error('Unable to load IPL history:', error);
         document.querySelectorAll('.history-error').forEach(element => {
-          element.textContent = `IPL history could not be loaded. ${error.message}. Check that the history data has been built and the server is available.`;
+          element.textContent = `IPL history could not be loaded. ${error.message}. Check that the history data file is deployed.`;
           element.hidden = false;
         });
       });
