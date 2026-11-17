@@ -927,6 +927,7 @@
         <button class="nav-link" role="menuitem" onclick="showPage('ipl-rankings')" id="nav-ipl-rankings">IPL Leaderboard</button>
         <button class="nav-link" role="menuitem" onclick="showPage('player-comparison')" id="nav-player-comparison">Compare Players</button>
         <button class="nav-link" role="menuitem" onclick="showPage('ranking-methodology')" id="nav-ranking-methodology">Methodology</button>
+        <button class="nav-link rr-auction-nav" role="menuitem" onclick="showPage('rr-auction-2027')" id="nav-rr-auction-2027">Special for RR Auction 2027</button>
       </div>
       <div class="nav-actions">
         <div class="nav-pill">SupeRR S2</div>
@@ -1189,6 +1190,24 @@
     background: #edf4ed;
     border-color: #dbe8dc;
   }
+  .rr-auction-nav {
+    white-space: nowrap;
+    color: #fff;
+    background: linear-gradient(135deg, #a43c20, #d27628);
+    border-color: #a43c20;
+    box-shadow: 0 4px 12px rgba(164, 60, 32, .2);
+  }
+  .rr-auction-nav:hover,
+  .rr-auction-nav.active {
+    color: #fff;
+    background: linear-gradient(135deg, #873019, #b85b1f);
+    border-color: #873019;
+    box-shadow: 0 6px 16px rgba(164, 60, 32, .28);
+  }
+  .rr-auction-nav:focus-visible {
+    outline: 3px solid rgba(210, 118, 40, .38);
+    outline-offset: 3px;
+  }
   .nav-pill {
     background: #123f30;
     padding: 8px 15px;
@@ -1196,6 +1215,166 @@
   }
   .ranking-page { padding: 42px 0 72px; }
   .ranking-page .container { max-width: 1320px; padding: 0 28px; }
+  #page-rr-auction-2027 .auction-hero {
+    padding: clamp(28px, 5vw, 56px);
+    border-radius: 22px;
+    background: linear-gradient(130deg, #123f30, #176b45 66%, #bd6a2b);
+    color: #fff;
+    box-shadow: 0 16px 38px rgba(18, 63, 48, .18);
+  }
+  #page-rr-auction-2027 .auction-hero h1 {
+    margin: 8px 0 12px;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    letter-spacing: -.045em;
+    line-height: 1.05;
+  }
+  #page-rr-auction-2027 .auction-hero p { max-width: 780px; color: rgba(255,255,255,.86); }
+  #page-rr-auction-2027 .auction-hero .auction-source-note { color: #ffe4a8; font-size: .9rem; }
+  #page-rr-auction-2027 .auction-eyebrow {
+    color: #ffe4a8;
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  #page-rr-auction-2027 .auction-download {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 12px;
+    border-color: #fff;
+    background: #fff;
+    color: #123f30;
+    text-decoration: none;
+  }
+  #page-rr-auction-2027 .auction-document {
+    display: grid;
+    gap: 0;
+    margin-top: 20px;
+    padding: clamp(20px, 4vw, 36px);
+    border: 1px solid #dce5dc;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(21,48,34,.05);
+  }
+  #page-rr-auction-2027 .auction-document p {
+    margin: 0;
+    padding: 9px 0;
+    border-bottom: 1px solid #edf1ed;
+    color: #30483a;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+  #page-rr-auction-2027 .auction-document p:last-child { border-bottom: 0; }
+  #page-rr-auction-2027 .auction-status { margin-top: 24px; color: #66776c; }
+  #page-rr-auction-2027 .auction-target-section { margin: 32px 0 40px; }
+  #page-rr-auction-2027 .auction-target-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin: 18px 0; }
+  #page-rr-auction-2027 .auction-target-button {
+    min-height: 52px;
+    padding: 12px 22px;
+    border: 2px solid #176b45;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #f5fbf6, #e4f2e7);
+    color: #0e6045;
+    font-weight: 800;
+    box-shadow: 0 4px 12px rgba(14,96,69,.13);
+    cursor: pointer;
+  }
+  #page-rr-auction-2027 .auction-target-button:hover,
+  #page-rr-auction-2027 .auction-target-button.is-active {
+    background: linear-gradient(135deg, #0e6045, #176b45);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(14,96,69,.2);
+  }
+  #page-rr-auction-2027 .auction-target-button:focus-visible,
+  #page-rr-auction-2027 .auction-player-card:focus-visible {
+    outline: 3px solid rgba(23,107,69,.32);
+    outline-offset: 3px;
+  }
+  #page-rr-auction-2027 .auction-target-status { color: #66776c; }
+  #page-rr-auction-2027 .auction-player-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  #page-rr-auction-2027 .auction-player-card {
+    display: grid;
+    gap: 5px;
+    width: 100%;
+    min-height: 112px;
+    padding: 16px;
+    border: 1px solid #dce5dc;
+    border-radius: 13px;
+    background: #fff;
+    color: #244536;
+    text-align: left;
+    cursor: pointer;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  #page-rr-auction-2027 .auction-player-card:hover {
+    transform: translateY(-2px);
+    border-color: #9db99c;
+    box-shadow: 0 7px 17px rgba(21,48,34,.1);
+  }
+  #page-rr-auction-2027 .auction-player-rank { color: #ad5525; font-size: .78rem; font-weight: 800; letter-spacing: .08em; }
+  #page-rr-auction-2027 .auction-player-card strong { font-size: 1.08rem; }
+  #page-rr-auction-2027 .auction-player-card small { color: #66776c; line-height: 1.4; }
+  #page-rr-auction-2027 .auction-player-profile {
+    margin-top: 22px;
+    padding: clamp(18px, 3vw, 30px);
+    border: 1px solid #dce5dc;
+    border-radius: 16px;
+    background: #f7faf7;
+    scroll-margin-top: 96px;
+  }
+  #page-rr-auction-2027 .auction-player-profile-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 16px;
+  }
+  #page-rr-auction-2027 .auction-player-profile-heading h3 { margin: 0; color: #123f30; }
+  #page-rr-auction-2027 .auction-player-profile-heading p { margin: 4px 0 0; color: #66776c; }
+  #page-rr-auction-2027 .auction-player-profile-content p { margin: 0; padding: 8px 0; border-bottom: 1px solid #e6ece6; line-height: 1.55; }
+  #page-rr-auction-2027 .auction-player-profile-content p:last-child { border-bottom: 0; }
+  #page-rr-auction-2027 .auction-player-profile-content { display: grid; gap: 14px; }
+  #page-rr-auction-2027 .auction-profile-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+  #page-rr-auction-2027 .auction-profile-fact {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    padding: 13px 15px;
+    border: 1px solid #e0e9e0;
+    border-radius: 11px;
+    background: #fff;
+  }
+  #page-rr-auction-2027 .auction-profile-fact span { color: #6a796f; font-size: .75rem; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }
+  #page-rr-auction-2027 .auction-profile-fact strong { color: #1b4935; line-height: 1.4; }
+  #page-rr-auction-2027 .auction-profile-card {
+    padding: 18px;
+    border: 1px solid #e0e9e0;
+    border-radius: 12px;
+    background: #fff;
+  }
+  #page-rr-auction-2027 .auction-profile-card h4 { margin: 0 0 8px; color: #176b45; font-size: 1rem; }
+  #page-rr-auction-2027 .auction-profile-card p + p { border-top: 1px solid #edf1ed; }
+  #page-rr-auction-2027 .auction-profile-table-wrap { overflow-x: auto; }
+  #page-rr-auction-2027 .auction-profile-table { width: 100%; border-collapse: collapse; background: #fff; }
+  #page-rr-auction-2027 .auction-profile-table caption { padding: 5px 0 11px; color: #66776c; text-align: left; }
+  #page-rr-auction-2027 .auction-profile-table th,
+  #page-rr-auction-2027 .auction-profile-table td { padding: 10px 12px; border-bottom: 1px solid #e6ece6; text-align: left; }
+  #page-rr-auction-2027 .auction-profile-table thead th { background: #f0f6f0; color: #244536; }
+  #page-rr-auction-2027 .auction-profile-table tbody th { color: #45584b; font-weight: 650; }
+  #page-rr-auction-2027 .auction-profile-analysis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  #page-rr-auction-2027 .auction-profile-score {
+    padding: 14px 18px;
+    border-radius: 11px;
+    background: #e8f3e8;
+    color: #123f30;
+    font-size: 1.05rem;
+  }
+  #page-rr-auction-2027 .auction-profile-verdict { color: #526357; font-size: .9rem; }
+  @media (max-width: 640px) {
+    #page-rr-auction-2027 .auction-player-list { grid-template-columns: 1fr; }
+    #page-rr-auction-2027 .auction-player-profile-heading { flex-direction: column; }
+    #page-rr-auction-2027 .auction-profile-analysis { grid-template-columns: 1fr; }
+  }
   .ranking-heading { margin-bottom: 28px; }
   .ranking-heading h1, .ranking-profile-heading h2 {
     letter-spacing: -.04em;
@@ -1567,6 +1746,40 @@
     <div id="ranking-definition-list" class="ranking-leaders"></div>
   </div>
 </div>
+<div id="page-rr-auction-2027" class="page ranking-page">
+  <div class="container">
+    <header class="auction-hero">
+      <p class="auction-eyebrow">Rajasthan Royals · Auction scouting</p>
+      <h1>Special for RR Auction 2027</h1>
+      <p>Browse the complete searchable contents of the Cricket_IQ Royal Scouting Intelligence presentation in one continuous report, including squad analysis, auction strategy, 20 shortlisted players, and final recommendations.</p>
+      <p class="auction-source-note">The source presentation is preserved as provided; auction timelines and player availability have not been refreshed for 2027.</p>
+      <a class="ranking-button auction-download" href="/RR_Auction_2027_Royal_Scouting_Intelligence.pptx" download>
+        Download original PowerPoint
+      </a>
+    </header>
+    <section class="auction-target-section" aria-labelledby="auction-target-heading">
+      <h2 id="auction-target-heading">RR Auction player shortlist</h2>
+      <p>Choose a shortlist to browse the players. Select a player to view their scouting profile and analysis from the presentation.</p>
+      <div class="auction-target-buttons" role="group" aria-label="Player shortlist">
+        <button id="auction-top-batters" class="auction-target-button" type="button" aria-pressed="false">Top 10 Batters</button>
+        <button id="auction-top-bowlers" class="auction-target-button" type="button" aria-pressed="false">Top 10 Bowlers</button>
+      </div>
+      <p id="auction-target-status" class="auction-target-status" role="status">Select Top 10 Batters or Top 10 Bowlers to see the shortlist.</p>
+      <div id="auction-player-list" class="auction-player-list"></div>
+      <section id="auction-player-profile" class="auction-player-profile" hidden aria-live="polite">
+        <div class="auction-player-profile-heading">
+          <div><h3 id="auction-player-profile-name"></h3><p id="auction-player-profile-meta"></p></div>
+          <button id="auction-close-player-profile" class="ranking-button" type="button">Close profile</button>
+        </div>
+        <div id="auction-player-profile-content" class="auction-player-profile-content"></div>
+      </section>
+    </section>
+    <p id="auction-details-status" class="auction-status" role="status">Loading presentation contents…</p>
+    <label for="auction-content-search">Search the presentation contents</label>
+    <input id="auction-content-search" class="compare-player-search" type="search" placeholder="Search names or topics…" autocomplete="off">
+    <article id="auction-presentation-content" class="auction-document"></article>
+  </div>
+</div>
 
 <!-- =================== FOOTER =================== -->
 <footer class="footer" role="contentinfo">
@@ -1897,7 +2110,7 @@ function closeIplPlayerProfile(event) {
 /* ---- PAGE NAVIGATION ---- */
 const PAGES = ['ipl-rankings','player-comparison','ranking-methodology'];
 function showPage(id) {
-  PAGES.forEach(p => {
+  [...PAGES, 'rr-auction-2027'].forEach(p => {
     document.getElementById('page-' + p)?.classList.toggle('active', p === id);
     const btn = document.getElementById('nav-' + p);
     if (btn) btn.classList.toggle('active', p === id);
@@ -1911,5 +2124,6 @@ document.addEventListener('keydown', event => {
 });
 </script>
 <script src="/ranking.js"></script>
+<script src="/rr_auction_2027.js"></script>
 </body>
 </html>

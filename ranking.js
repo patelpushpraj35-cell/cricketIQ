@@ -128,9 +128,11 @@
     document.getElementById('page-ipl-rankings')?.classList.toggle('active', id === 'ipl-rankings');
     document.getElementById('page-player-comparison')?.classList.toggle('active', id === 'player-comparison');
     document.getElementById('page-ranking-methodology')?.classList.toggle('active', id === 'ranking-methodology');
+    document.getElementById('page-rr-auction-2027')?.classList.toggle('active', id === 'rr-auction-2027');
     document.getElementById('nav-ipl-rankings')?.classList.toggle('active', id === 'ipl-rankings');
     document.getElementById('nav-player-comparison')?.classList.toggle('active', id === 'player-comparison');
     document.getElementById('nav-ranking-methodology')?.classList.toggle('active', id === 'ranking-methodology');
+    document.getElementById('nav-rr-auction-2027')?.classList.toggle('active', id === 'rr-auction-2027');
   }
 
   function renderMetadata() {
