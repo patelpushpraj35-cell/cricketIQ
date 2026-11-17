@@ -562,7 +562,7 @@
       document.getElementById('nav-ipl-rankings').addEventListener('click', () => showPage('ipl-rankings'));
       document.getElementById('nav-player-comparison').addEventListener('click', () => showPage('player-comparison'));
       document.getElementById('nav-ranking-methodology').addEventListener('click', () => showPage('ranking-methodology'));
-      document.getElementById('ranking-compare-button').addEventListener('click', () => showPage('player-comparison'));
+      document.getElementById('ranking-rr-auction-button').addEventListener('click', () => showPage('rr-auction-2027'));
     } catch (error) {
       showError(`${error.message} Check that the dashboard data file is deployed.`);
     }
